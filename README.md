@@ -20,7 +20,8 @@ npm run dev
 
 | To change | Edit |
 | --- | --- |
-| Gift names, Scripture, result copy | `lib/gifts.ts` |
+| Gift names, the six groups, definitions | `lib/gifts.ts` |
+| Intro text and the three FAQ items | `components/Assessment.tsx` |
 | Questions (add a 5th per gift to lengthen) | `lib/questions.ts` |
 | Ministry areas and which gifts fit them | Notion "Ministry Areas" database (fallback: `lib/ministries.ts`) |
 | Scoring, tie-breaks, summary wording | `lib/scoring.ts` |
@@ -30,8 +31,9 @@ npm run dev
 
 ## How scoring works
 
-Each gift has the same number of statements, each answered 1 to 5. A gift's score is the sum (4 statements = 4 to 20).
+Each of the 25 gifts has the same number of statements (3), each answered 1 to 5. A gift's score is the sum (3 to 15).
 Ties break by how many statements were answered "Consistently like me." The top 3 are "primary," ranks 4 to 6 "supporting."
+Each gift belongs to one or more of six groups (Manifestation, Ministry / Office, Motivational / Grace, Support, Worship & Priestly, Sign), and the results show a per-group average.
 Ministry fit is a weighted average of the gifts mapped to that area. Only areas that include one of the person's top 6 gifts are shown.
 The server recomputes results from the raw answers, so emails always match what the person saw.
 

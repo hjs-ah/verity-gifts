@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { GIFTS } from '@/lib/gifts';
+import { CATEGORIES, GIFTS } from '@/lib/gifts';
 import { QUESTIONS, SCALE } from '@/lib/questions';
 import type { Answers } from '@/lib/scoring';
 import type { Ministry } from '@/lib/ministries';
@@ -104,7 +104,9 @@ export default function Assessment({ ministries }: { ministries: Ministry[] }) {
         <section className="intro" aria-labelledby="intro-title">
           <h1 id="intro-title">Discover how God has gifted you.</h1>
           <p className="lede">
-            {TOTAL} short statements about how you naturally show up. There are no right answers, only honest ones.
+            This assessment helps you see how the Holy Spirit has gifted you and where those gifts can serve at Verity Outreach
+            Worship Center. It follows the six groups of gifts our leadership teaches. Answer honestly, then use your results as the
+            start of a conversation with your pastor.
           </p>
           <div className="stats">
             <div className="stat"><b>{TOTAL}</b><span>statements</span></div>
@@ -118,6 +120,33 @@ export default function Assessment({ ministries }: { ministries: Ministry[] }) {
           </div>
           <button className="btn" onClick={start}>Start the assessment</button>
           <p className="fine">Your answers stay in this browser until you choose to email your results.</p>
+
+          <div className="faq" aria-label="About spiritual gifts">
+            <details>
+              <summary>What are spiritual gifts?</summary>
+              <p>
+                Spiritual gifts are abilities and graces the Holy Spirit gives to believers so the whole Body is built up. Scripture
+                teaches that a manifestation of the Spirit is given to each person for the common good (1 Corinthians 12:7). A gift is
+                never about status. It is God&rsquo;s provision for the people around you.
+              </p>
+            </details>
+            <details>
+              <summary>How are the gifts grouped here?</summary>
+              <ul>
+                {CATEGORIES.map((c) => (
+                  <li key={c.id}><b>{c.title}</b>{c.scripture ? ` (${c.scripture})` : ''}. {c.blurb}</li>
+                ))}
+              </ul>
+            </details>
+            <details>
+              <summary>How do I get the most from my results?</summary>
+              <p>
+                Answer by how you naturally show up, not how you wish you did. There are no right answers. Your results rank all {GIFTS.length} gifts,
+                so look at your top few and the group they fall in. The ministry offices (Apostle, Prophet, Evangelist, Pastor) are recognized by
+                church leadership, so take those to your pastor. Then try serving where your gifts point, and watch for fruit.
+              </p>
+            </details>
+          </div>
         </section>
       ) : stage === 'quiz' ? (
         <section aria-labelledby="statement">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { GIFT_MAP } from '@/lib/gifts';
+import { CATEGORY_MAP, GIFT_MAP, giftScripture } from '@/lib/gifts';
 import type { Ministry } from '@/lib/ministries';
 import { buildResults, type Answers } from '@/lib/scoring';
 
@@ -86,15 +86,28 @@ export default function Results({ name, answers, ministries, onRetake }: Props) 
             return (
               <article key={g.id} className="top-item">
                 <span className="rank" aria-label={`Number ${g.rank}`}>{g.rank}</span>
-                <h3>{gift.name}<small>{gift.scripture}</small></h3>
+                <h3>{gift.name}{giftScripture(gift) ? <small>{giftScripture(gift)}</small> : null}</h3>
                 <div className="score" aria-label={`${g.score} out of ${g.max}`}>{g.score}<span>/{g.max}</span></div>
                 <div>
-                  <p>{gift.tagline}</p>
-                  <p className="desc">{gift.description}</p>
+                  <p className="desc">{gift.tagline}</p>
+                  <p className="cats">{gift.categories.map((c) => CATEGORY_MAP[c].name).join(' and ')}</p>
                 </div>
               </article>
             );
           })}
+        </div>
+
+        <h2 className="section-title">Your gifting by group</h2>
+        <div className="bars">
+          {r.categories.map((c, i) => (
+            <div key={c.id} className="bar-row wide">
+              <b>{CATEGORY_MAP[c.id].name}</b>
+              <div className="bar-track" role="img" aria-label={`${CATEGORY_MAP[c.id].name}: ${Math.round(c.strength * 100)} percent`}>
+                <div className={`bar-fill${i === 0 ? ' primary' : ''}`} style={{ width: `${Math.max(4, c.strength * 100)}%`, animationDelay: `${i * 60}ms` }} />
+              </div>
+              <span className="n">{Math.round(c.strength * 100)}%</span>
+            </div>
+          ))}
         </div>
 
         {r.ministries.length > 0 ? (

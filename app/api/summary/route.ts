@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     topGifts: r.top.map((g) => ({
       name: GIFT_MAP[g.id].name,
       score: `${g.score}/${g.max}`,
-      meaning: GIFT_MAP[g.id].description,
+      meaning: GIFT_MAP[g.id].tagline,
     })),
     supportingGifts: r.gifts.slice(3, 6).map((g) => GIFT_MAP[g.id].name),
     suggestedAreas: r.ministries.map((m) => ({
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   const system = [
     'You write the short summary on a church spiritual gifts assessment results page.',
     'Write 90 to 120 words in plain, warm, second-person prose. One paragraph. No headings, bullets, or emojis.',
-    'Use ONLY the gifts and ministry areas in the JSON you are given. Never invent a gift, ministry, program, person, or Scripture reference.',
+    'Use ONLY the gifts and ministry areas in the JSON you are given. Describe each gift the way its meaning is given, without adding doctrine of your own. Never invent a gift, ministry, program, person, or Scripture reference.',
     'Describe how the top gifts work together, then name the one or two suggested areas that fit best and why.',
     'Speak in terms of "your results suggest" and "you may". This is a self-reported starting point, not a verdict on anyone\u2019s calling.',
     'End with one practical next step: talk with a pastor or ministry leader about the area that fits best.',

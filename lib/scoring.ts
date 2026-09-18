@@ -1,4 +1,4 @@
-import { GIFTS, GIFT_MAP, type GiftId } from './gifts';
+import { CATEGORIES, CATEGORY_MAP, GIFTS, GIFT_MAP, type CategoryId, type GiftId } from './gifts';
 import { ITEMS_PER_GIFT, QUESTIONS } from './questions';
 import type { Ministry } from './ministries';
 
@@ -27,8 +27,16 @@ export interface MinistryFit {
   because: GiftId[];
 }
 
+export interface CategoryScore {
+  id: CategoryId;
+  /** Average strength (0-1) of the gifts in this group. */
+  strength: number;
+  rank: number;
+}
+
 export interface Results {
   gifts: GiftScore[];
+  categories: CategoryScore[];
   top: GiftScore[];
   /** Gifts tied with the #3 gift that did not make the top three. */
   ties: GiftScore[];
@@ -118,11 +126,22 @@ export function buildResults(answers: Answers, ministries: Ministry[] = []): Res
     notes.push(`${joinList(ties.map((t) => GIFT_MAP[t.id].name))} scored the same as ${GIFT_MAP[top[2].id].name}. Treat them as equally strong.`);
   }
 
+  if (top.some((g) => GIFT_MAP[g.id].office)) {
+    notes.push('Apostle, Prophet, Evangelist, and Pastor are ministry offices that church leadership recognizes and affirms. Treat this as a starting point for a conversation with your pastor.');
+  }
+
+  const categories: CategoryScore[] = CATEGORIES.map((c) => {
+    const members = gifts.filter((g) => GIFT_MAP[g.id].categories.includes(c.id));
+    return { id: c.id, strength: members.reduce((s, g) => s + g.strength, 0) / members.length, rank: 0 };
+  })
+    .sort((a, b) => b.strength - a.strength)
+    .map((c, i) => ({ ...c, rank: i + 1 }));
+
   const does = top.map((g) => GIFT_MAP[g.id].does);
   const first = matched[0]?.ministry.name;
   const second = matched[1]?.ministry.name;
   const where = first && second ? ` The areas at Verity where that mix is most needed are ${first} and ${second}.` : first ? ` The area at Verity where that mix is most needed is ${first}.` : '';
-  const summary = `Your strongest gifts are ${joinList(top.map((g) => GIFT_MAP[g.id].name))}. You are wired to ${does[0]}, ${does[1]}, and ${does[2]}.${where}`;
+  const summary = `Your strongest gifts are ${joinList(top.map((g) => GIFT_MAP[g.id].name))}. You are wired to ${does[0]}, ${does[1]}, and ${does[2]}. Across the six groups, your gifting leans most toward ${CATEGORY_MAP[categories[0].id].name}.${where}`;
 
-  return { gifts, top, ties, ministries: matched, notes, summary };
+  return { gifts, categories, top, ties, ministries: matched, notes, summary };
 }
