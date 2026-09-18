@@ -1,5 +1,6 @@
 import { GIFTS, type GiftId } from './gifts';
 import { CORE_WEIGHT, MINISTRIES, SUPPORT_WEIGHT, type Ministry } from './ministries';
+import { HERO_DEFAULTS, cleanHeroColor, cleanHeroImage, cleanHeroText, type HeroSettings } from './hero';
 
 /**
  * Notion helpers. Uses plain fetch against the Notion REST API (no SDK).
@@ -198,5 +199,33 @@ export async function attachContact(
   } catch (err) {
     console.error('[gifts] Notion contact update failed', err);
     return false;
+  }
+}
+
+
+// The Site Settings database ID is not a secret. Override with NOTION_SETTINGS_DB_ID if it ever moves.
+const SETTINGS_DB_ID = process.env.NOTION_SETTINGS_DB_ID || '3f12f8242e7f43c495333f3d7af71ac6';
+
+/** Header banner settings from the first row of the Site Settings database. Falls back to defaults on any problem. */
+export async function getHeroSettings(): Promise<HeroSettings> {
+  if (!process.env.NOTION_API_KEY) return HERO_DEFAULTS;
+  try {
+    const res = await fetch(`${BASE}/databases/${SETTINGS_DB_ID}/query`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ page_size: 1 }),
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) throw new Error(`Notion ${res.status}`);
+    const p = (await res.json()).results?.[0]?.properties;
+    if (!p) return HERO_DEFAULTS;
+    return {
+      text: cleanHeroText(plain(p['Header text']?.rich_text)),
+      color: cleanHeroColor(plain(p['Background color']?.rich_text)),
+      imageUrl: cleanHeroImage(p['Background image URL']?.url),
+    };
+  } catch (err) {
+    console.error('[gifts] Notion site settings failed, using defaults', err);
+    return HERO_DEFAULTS;
   }
 }

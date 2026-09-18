@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CATEGORIES, GIFTS } from '@/lib/gifts';
+import { cssUrl, type HeroSettings } from '@/lib/hero';
 import type { Ministry } from '@/lib/ministries';
 import { QUESTIONS, SCALE } from '@/lib/questions';
 import type { Answers } from '@/lib/scoring';
@@ -20,7 +21,7 @@ const MINUTES = Math.max(1, Math.round((TOTAL * 8) / 60)); // about 8 seconds a 
 const prettyDate = (iso: string | null) =>
   iso ? new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'earlier';
 
-export default function Assessment({ ministries }: { ministries: Ministry[] }) {
+export default function Assessment({ ministries, hero }: { ministries: Ministry[]; hero: HeroSettings }) {
   const [ready, setReady] = useState(false);
   const [stage, setStage] = useState<Stage>('intro');
   const [first, setFirst] = useState('');
@@ -148,20 +149,37 @@ export default function Assessment({ ministries }: { ministries: Ministry[] }) {
   const q = QUESTIONS[index];
   const answered = Object.keys(answers).length;
 
+  const topbar = (
+    <header className="topbar">
+      <div className="brand">
+        <a className="brand-logo" href="https://vowcenter.com" aria-label="Verity Outreach Worship Center, vowcenter.com">
+          <Image src="/logos/vow.png" alt="Verity Outreach Worship Center" width={602} height={287} priority style={{ height: 48, width: 'auto' }} />
+        </a>
+      </div>
+      <ThemeToggle />
+    </header>
+  );
+  const showHero = !ready || stage === 'intro';
+
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div className="brand">
-          <a className="brand-logo" href="https://vowcenter.com" aria-label="Verity Outreach Worship Center, vowcenter.com">
-            <Image src="/logos/vow.png" alt="Verity Outreach Worship Center" width={602} height={287} priority style={{ height: 48, width: 'auto' }} />
-          </a>
-        </div>
-        <ThemeToggle />
-      </header>
+    <main>
+      {showHero ? (
+        <section
+          className={`hero${hero.imageUrl ? ' has-image' : ''}`}
+          style={{ backgroundColor: hero.color, ...(hero.imageUrl ? { backgroundImage: cssUrl(hero.imageUrl) } : {}) }}
+          aria-labelledby="intro-title"
+        >
+          <div className="hero-inner">
+            {topbar}
+            <h1 id="intro-title" className="hero-title">{hero.text}</h1>
+          </div>
+        </section>
+      ) : null}
+      <div className={`shell${showHero ? ' after-hero' : ''}`}>
+      {showHero ? null : topbar}
 
       {!ready ? null : stage === 'intro' ? (
-        <section className="intro" aria-labelledby="intro-title">
-          <h1 id="intro-title">Discover how God has gifted you.</h1>
+        <section className="intro">
           <p className="lede">
             This assessment helps you see how the Holy Spirit has gifted you and where those gifts can serve at Verity Outreach
             Worship Center. It follows the six groups of gifts our leadership teaches. Answer honestly, then use your results as the
@@ -264,6 +282,7 @@ export default function Assessment({ ministries }: { ministries: Ministry[] }) {
       ) : (
         <Results first={first.trim()} last={last.trim()} answers={answers} ministries={ministries} onRetake={startOver} />
       )}
+      </div>
     </main>
   );
 }

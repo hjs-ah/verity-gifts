@@ -21,6 +21,7 @@ npm run dev
 | To change | Edit |
 | --- | --- |
 | Gift names, the six groups, definitions | `lib/gifts.ts` |
+| Header banner text, color, and image | Notion "Site Settings" database (fallback: `lib/hero.ts`) |
 | Intro text and the three FAQ items | `components/Assessment.tsx` |
 | Questions (add a 5th per gift to lengthen) | `lib/questions.ts` |
 | Ministry areas and which gifts fit them | Notion "Ministry Areas" database (fallback: `lib/ministries.ts`) |
@@ -74,3 +75,10 @@ then put its secret in Vercel as `NOTION_API_KEY`. Without it the site uses `lib
 3. To add questions, add one to every gift. The build fails on purpose if any gift has a different count, so a lopsided edit can never go live.
 4. Commit. Vercel redeploys in about a minute. To preview first, commit to a branch and open the preview link Vercel posts.
 Changing wording changes what a score means, so do it deliberately and expect earlier results not to be directly comparable.
+
+## Header banner
+
+The banner on the first screen is 100% wide and 500px tall (380px on phones), with the text sitting 50px from the bottom in white.
+Edit the **Header** row in the Notion "Site Settings" database: **Header text**, **Background color** (hex like #1F4E5F), and
+**Background image URL** (a permanent https link, or a path from this site like /hero.jpg). The image is centered and scaled to cover.
+Leave the image blank to show only the color. Changes appear within about a minute. Invalid values fall back to the defaults in `lib/hero.ts`.
