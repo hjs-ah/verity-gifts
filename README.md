@@ -79,6 +79,6 @@ Changing wording changes what a score means, so do it deliberately and expect ea
 ## Header banner
 
 The banner on the first screen is 100% wide and 500px tall (380px on phones), with the text sitting 50px from the bottom in white.
-Edit the **Header** row in the Notion "Site Settings" database: **Header text**, **Background color** (hex like #1F4E5F), and
+Edit the **Header** row in the Notion "Site Settings" database: **Header text**, **Background color** (hex like #2B2B2B), and
 **Background image URL** (a permanent https link, or a path from this site like /hero.jpg). The image is centered and scaled to cover.
 Leave the image blank to show only the color. Changes appear within about a minute. Invalid values fall back to the defaults in `lib/hero.ts`.

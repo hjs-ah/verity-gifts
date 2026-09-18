@@ -8,7 +8,7 @@ export interface HeroSettings {
 
 export const HERO_DEFAULTS: HeroSettings = {
   text: 'Discover your gifts, and put them to work.',
-  color: '#1F4E5F',
+  color: '#2B2B2B',
   imageUrl: '',
 };
 
