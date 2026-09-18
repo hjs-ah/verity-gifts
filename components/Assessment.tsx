@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CATEGORIES, GIFTS } from '@/lib/gifts';
+import { CATEGORIES } from '@/lib/gifts';
 import { cssUrl, type HeroSettings } from '@/lib/hero';
 import type { Ministry } from '@/lib/ministries';
 import { QUESTIONS, SCALE } from '@/lib/questions';
@@ -206,7 +206,7 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
             <details>
               <summary>How do I get the most from my results?</summary>
               <p>
-                Answer by how you naturally show up, not how you wish you did. There are no right answers. Your results rank all {GIFTS.length} gifts,
+                Answer by how you naturally show up, not how you wish you did. There are no right answers. Your results rank every gift,
                 so look at your top few and the group they fall in. The ministry offices (Apostle, Prophet, Evangelist, Pastor) are recognized by
                 church leadership, so take those to your pastor. Then try serving where your gifts point, and watch for fruit.
               </p>
@@ -216,7 +216,6 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
           <div className="stats">
             <div className="stat"><b>{TOTAL}</b><span>statements</span></div>
             <div className="stat"><b>~{MINUTES}</b><span>minutes</span></div>
-            <div className="stat"><b>{GIFTS.length}</b><span>gifts</span></div>
           </div>
 
           <form onSubmit={start} className="start-form">
