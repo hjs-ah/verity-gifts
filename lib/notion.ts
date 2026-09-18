@@ -75,36 +75,128 @@ export async function getMinistryConfig(): Promise<MinistryConfig> {
 }
 
 const rt = (s: string) => [{ type: 'text', text: { content: s.slice(0, 1900) } }];
+const today = () => new Date().toISOString().slice(0, 10);
 
-/** Logs a submission row. Returns true on success. Never throws. */
-export async function logSubmission(row: {
-  name: string; email: string; wantsFollowUp: boolean; topGifts: string; interest: string; areas: string; ranking: string;
-}): Promise<boolean> {
-  const key = process.env.NOTION_API_KEY;
-  const db = process.env.NOTION_SUBMISSIONS_DB_ID;
-  if (!key || !db) return false;
+export const submissionsReady = () => Boolean(process.env.NOTION_API_KEY && process.env.NOTION_SUBMISSIONS_DB_ID);
+
+export interface SubmissionRecord {
+  id: string;
+  attempts: number;
+  answers: string;
+  completedAt: string | null;
+  hasEmail: boolean;
+  status: string | null;
+  topGifts: string;
+  history: string;
+}
+
+/** Finds the one row for this person (by name key). Returns null if none, or if Notion is not configured or fails. */
+export async function findSubmission(key: string): Promise<SubmissionRecord | null> {
+  if (!submissionsReady()) return null;
   try {
-    const res = await fetch(`${BASE}/pages`, {
+    const res = await fetch(`${BASE}/databases/${process.env.NOTION_SUBMISSIONS_DB_ID}/query`, {
       method: 'POST',
       headers: headers(),
+      body: JSON.stringify({ filter: { property: 'Name key', rich_text: { equals: key } }, page_size: 1 }),
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`Notion ${res.status}: ${await res.text()}`);
+    const page = (await res.json()).results?.[0];
+    if (!page) return null;
+    const p = page.properties;
+    return {
+      id: page.id,
+      attempts: typeof p['Attempts']?.number === 'number' ? p['Attempts'].number : 1,
+      answers: plain(p['Answers']?.rich_text),
+      completedAt: p['Last completed']?.date?.start ?? page.created_time ?? null,
+      hasEmail: Boolean(p['Email']?.email),
+      status: p['Status']?.select?.name ?? null,
+      topGifts: plain(p['Top gifts']?.rich_text),
+      history: plain(p['History']?.rich_text),
+    };
+  } catch (err) {
+    console.error('[gifts] Notion lookup failed', err);
+    return null;
+  }
+}
+
+export interface CompletionInput {
+  fullName: string; key: string; answers: string; topGifts: string; ranking: string; areas: string;
+}
+
+/**
+ * Logs a completed assessment. One row per person: a retake updates the row,
+ * bumps Attempts, and appends the earlier top gifts to History so nothing is lost.
+ */
+export async function upsertCompletion(input: CompletionInput, existing?: SubmissionRecord | null): Promise<{ ok: boolean; created: boolean }> {
+  if (!submissionsReady()) return { ok: false, created: false };
+  try {
+    const found = existing === undefined ? await findSubmission(input.key) : existing;
+    const shared = {
+      Answers: { rich_text: rt(input.answers) },
+      'Top gifts': { rich_text: rt(input.topGifts) },
+      'Suggested areas': { rich_text: rt(input.areas) },
+      'Full ranking': { rich_text: rt(input.ranking) },
+      'Last completed': { date: { start: today() } },
+    };
+    let res: Response;
+    if (found) {
+      const line = `${(found.completedAt ?? '').slice(0, 10) || 'earlier'}: ${found.topGifts}`;
+      const history = [found.history, line].filter(Boolean).join('\n').slice(-1800);
+      res = await fetch(`${BASE}/pages/${found.id}`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ properties: { ...shared, Attempts: { number: found.attempts + 1 }, History: { rich_text: rt(history) } } }),
+      });
+    } else {
+      res = await fetch(`${BASE}/pages`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({
+          parent: { database_id: process.env.NOTION_SUBMISSIONS_DB_ID },
+          properties: {
+            ...shared,
+            Name: { title: rt(input.fullName) },
+            'Name key': { rich_text: rt(input.key) },
+            Attempts: { number: 1 },
+            'Wants follow-up': { checkbox: false },
+            Status: { select: { name: 'No email yet' } },
+          },
+        }),
+      });
+    }
+    if (!res.ok) throw new Error(`Notion ${res.status}: ${await res.text()}`);
+    return { ok: true, created: !found };
+  } catch (err) {
+    console.error('[gifts] Notion completion log failed', err);
+    return { ok: false, created: false };
+  }
+}
+
+/** Adds contact details to an existing row. Never downgrades a status the ministry team has already moved. */
+export async function attachContact(
+  record: SubmissionRecord,
+  c: { email: string; wantsFollowUp: boolean; interest: string },
+): Promise<boolean> {
+  if (!submissionsReady()) return false;
+  try {
+    const worked = record.status === 'Contacted' || record.status === 'Placed';
+    const res = await fetch(`${BASE}/pages/${record.id}`, {
+      method: 'PATCH',
+      headers: headers(),
       body: JSON.stringify({
-        parent: { database_id: db },
         properties: {
-          Name: { title: rt(row.name || 'Anonymous') },
-          Email: { email: row.email },
-          'Wants follow-up': { checkbox: row.wantsFollowUp },
-          Status: { select: { name: row.wantsFollowUp ? 'New' : 'No follow-up needed' } },
-          'Top gifts': { rich_text: rt(row.topGifts) },
-          'Interested in serving': { rich_text: rt(row.interest || '') },
-          'Suggested areas': { rich_text: rt(row.areas || '') },
-          'Full ranking': { rich_text: rt(row.ranking) },
+          Email: { email: c.email },
+          'Wants follow-up': { checkbox: c.wantsFollowUp },
+          'Interested in serving': { rich_text: rt(c.interest) },
+          ...(worked ? {} : { Status: { select: { name: c.wantsFollowUp ? 'New' : 'No follow-up needed' } } }),
         },
       }),
     });
     if (!res.ok) throw new Error(`Notion ${res.status}: ${await res.text()}`);
     return true;
   } catch (err) {
-    console.error('[gifts] Notion submission log failed', err);
+    console.error('[gifts] Notion contact update failed', err);
     return false;
   }
 }

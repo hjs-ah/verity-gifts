@@ -40,8 +40,8 @@ The server recomputes results from the raw answers, so emails always match what 
 ## Email (Resend)
 
 Set `RESEND_API_KEY`, `RESEND_FROM` (a verified sender), and `MINISTRY_TO_EMAIL`.
-Submitting the results form sends "Gifts form completed" to the ministry inbox and a copy to the person.
-Without these variables the form returns a friendly "not set up yet" message and nothing breaks.
+Finishing the assessment sends "Gifts form completed" (or "retaken") to the ministry inbox. Submitting the results form sends the person a copy and, if they asked for follow-up, a "Follow-up requested" notice to the ministry.
+Without these variables emails are skipped and nothing breaks; logging to Notion still works.
 
 ## Optional AI summary
 
@@ -61,7 +61,7 @@ Two databases live under the "Verity Gifts Project" page in Notion:
 
 - **Ministry Areas** feeds the "Where these gifts could serve" cards. Uncheck **Active** to hide an area; edits appear within about a minute.
   Core gifts count 3x and Supporting gifts 1x. If every area is unchecked, the section disappears.
-- **Gift Submissions** receives one row per person who emails their results (name, email, top gifts, follow-up status).
+- **Gift Submissions** gets one row per person, created when they finish (name, top gifts, ranking, saved answers). A retake updates the same row. Emailing results adds their email to it. Name (first + last) is the key.
 
 Setup: create an internal integration at notion.so/profile/integrations, open the "Verity Gifts Project" page, use Connections to add the integration,
 then put its secret in Vercel as `NOTION_API_KEY`. Without it the site uses `lib/ministries.ts` and skips logging.

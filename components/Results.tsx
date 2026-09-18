@@ -5,14 +5,13 @@ import { CATEGORY_MAP, GIFT_MAP, giftScripture } from '@/lib/gifts';
 import type { Ministry } from '@/lib/ministries';
 import { buildResults, type Answers } from '@/lib/scoring';
 
-interface Props { name: string; answers: Answers; ministries: Ministry[]; onRetake: () => void }
+interface Props { first: string; last: string; answers: Answers; ministries: Ministry[]; onRetake: () => void }
 
 const AI_ON = process.env.NEXT_PUBLIC_AI_SUMMARY === 'true';
 
-export default function Results({ name, answers, ministries, onRetake }: Props) {
+export default function Results({ first, last, answers, ministries, onRetake }: Props) {
   const r = useMemo(() => buildResults(answers, ministries), [answers, ministries]);
   const cardRef = useRef<HTMLDivElement>(null);
-  const first = name.trim();
   const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   // Optional AI narrative. The built-in summary shows immediately and is replaced only if the AI one arrives.
@@ -51,7 +50,7 @@ export default function Results({ name, answers, ministries, onRetake }: Props) 
     try {
       const res = await fetch('/api/submit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: first, email, interest, wantsFollowUp: followUp, answers, website }),
+        body: JSON.stringify({ first, last, email, interest, wantsFollowUp: followUp, answers, website }),
       });
       const d = await res.json().catch(() => ({}));
       if (res.ok) setStatus({ kind: 'ok', text: d.emailed ? 'Sent. Check your inbox for a copy of your results.' : 'Received. Someone from Verity will be in touch.' });
@@ -144,7 +143,7 @@ export default function Results({ name, answers, ministries, onRetake }: Props) 
 
       <div className="share">
         <h2>Want a copy in your inbox?</h2>
-        <p>Add your email and we will send your results. If you would like, someone from Verity will follow up with you.</p>
+        <p>Your results are already saved with the Verity team. Add your email and we will send you a copy. If you would like, someone from Verity will follow up with you.</p>
         <form onSubmit={send}>
           <div className="field">
             <label htmlFor="email">Email</label>
@@ -166,7 +165,7 @@ export default function Results({ name, answers, ministries, onRetake }: Props) 
           </label>
           <div className="hp" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
           <div><button className="btn" type="submit" disabled={sending}>{sending ? 'Sending' : 'Email me my results'}</button></div>
-          <p className="fine" style={{ margin: 0 }}>Your name, email, and results go to the Verity team when you send this.</p>
+          <p className="fine" style={{ margin: 0 }}>Your email is added to your saved results and shared with the Verity team.</p>
           {status ? <p className={`status${status.kind === 'err' ? ' err' : ''}`} role="status">{status.text}</p> : null}
         </form>
       </div>
