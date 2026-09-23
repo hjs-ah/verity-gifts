@@ -64,10 +64,23 @@ button { cursor: pointer; }
 .brand-logo { background: #fff; border-radius: 12px; padding: 4px 8px; display: flex; }
 .brand-logo img { display: block; }
 .brand-name { font-family: var(--font-head); font-weight: 600; font-size: 0.95rem; color: var(--muted); }
-.icon-btn {
-  border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-pill);
-  width: 44px; height: 44px; display: grid; place-items: center; flex: none; color: var(--ink);
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 0.55rem; flex: none;
+  height: 40px; padding: 0 0.4rem 0 0.85rem; border-radius: var(--r-pill);
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
 }
+.theme-toggle-label {
+  font-family: var(--font-head); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); white-space: nowrap;
+}
+.theme-toggle-icon {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent); flex: none;
+}
+.hero .theme-toggle { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
+.hero .theme-toggle-label { color: rgba(255, 255, 255, 0.85); }
+.hero .theme-toggle-icon { background: rgba(255, 255, 255, 0.18); color: #fff; }
+
 
 /* ---------- intro ---------- */
 .intro h1 { font-size: clamp(2rem, 7vw, 3.6rem); font-weight: 700; width: 100%; }
@@ -236,3 +249,7 @@ button { cursor: pointer; }
 }
 .shell.after-hero { padding-top: 2rem; }
 @media (max-width: 34rem) { .hero { min-height: 380px; } }
+
+.top-item .shows-in, .top-item .stakes { color: var(--muted); font-size: 0.93rem; margin-top: 0.55rem; line-height: 1.5; }
+.top-item .shows-in b, .top-item .stakes b { color: var(--ink); font-weight: 600; }
+.top-item .gift-note { color: var(--muted); font-size: 0.88rem; margin-top: 0.5rem; padding: 0.6rem 0.85rem; background: var(--panel); border-radius: 10px; line-height: 1.5; }

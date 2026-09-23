@@ -90,6 +90,9 @@ export default function Results({ first, last, answers, ministries, onRetake }: 
                 <div>
                   <p className="desc">{gift.tagline}</p>
                   <p className="cats">{gift.categories.map((c) => CATEGORY_MAP[c].name).join(' and ')}</p>
+                  <p className="shows-in"><b>Shows up in:</b> {gift.whereItShows}</p>
+                  <p className="stakes"><b>Why it matters:</b> {gift.stakes}</p>
+                  {gift.note ? <p className="gift-note">{gift.note}</p> : null}
                 </div>
               </article>
             );

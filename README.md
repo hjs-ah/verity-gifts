@@ -20,7 +20,7 @@ npm run dev
 
 | To change | Edit |
 | --- | --- |
-| Gift names, the six groups, definitions | `lib/gifts.ts` |
+| Gift names, the six groups, definitions, "Shows up in" and "Why it matters" text | `lib/gifts.ts` |
 | Header banner text, color, and image | Notion "Site Settings" database (fallback: `lib/hero.ts`) |
 | Intro text and the three FAQ items | `components/Assessment.tsx` |
 | Questions (add a 5th per gift to lengthen) | `lib/questions.ts` |
@@ -82,3 +82,10 @@ The banner on the first screen is 100% wide and 500px tall (380px on phones), wi
 Edit the **Header** row in the Notion "Site Settings" database: **Header text**, **Background color** (hex like #2B2B2B), and
 **Background image URL** (a permanent https link, or a path from this site like /hero.jpg). The image is centered and scaled to cover.
 Leave the image blank to show only the color. Changes appear within about a minute. Invalid values fall back to the defaults in `lib/hero.ts`.
+
+## Resolved: Teacher vs. Teaching
+
+The leadership gift-definitions document lists "Teacher" (Ministry/Office, Ephesians 4:11) and "Teaching" (Motivational/Grace,
+Romans 12:7) as separate entries. Confirmed to keep them merged as one shared gift called "Teaching"
+(`lib/gifts.ts`, id `teaching`, categories `['office', 'motivational']`), matching how Prophecy, Healing, and Helps are
+already shared across groups. No further action.
