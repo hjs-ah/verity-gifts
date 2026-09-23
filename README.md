@@ -22,6 +22,7 @@ npm run dev
 | --- | --- |
 | Gift names, the six groups, definitions, "Shows up in" and "Why it matters" text | `lib/gifts.ts` |
 | Header banner text, color, and image | Notion "Site Settings" database (fallback: `lib/hero.ts`) |
+| FAQ accordion items | `components/Assessment.tsx`, uses `components/Faq.tsx` |
 | Intro text and the three FAQ items | `components/Assessment.tsx` |
 | Questions (add a 5th per gift to lengthen) | `lib/questions.ts` |
 | Ministry areas and which gifts fit them | Notion "Ministry Areas" database (fallback: `lib/ministries.ts`) |

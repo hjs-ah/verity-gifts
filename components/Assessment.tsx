@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CATEGORIES } from '@/lib/gifts';
+import { Faq, FaqItem } from './Faq';
 import { cssUrl, type HeroSettings } from '@/lib/hero';
 import type { Ministry } from '@/lib/ministries';
 import { QUESTIONS, SCALE } from '@/lib/questions';
@@ -104,26 +105,41 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
     window.scrollTo({ top: 0 });
   }
 
+  // Looks up whether {first, last} has completed the assessment before. Shared by the Start
+  // button (silent — falls through to a fresh attempt) and the explicit "Look up my results" action.
+  async function lookup(): Promise<Returning | null> {
+    const res = await fetch('/api/lookup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ first: first.trim(), last: last.trim() }),
+      signal: AbortSignal.timeout(6000),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (res.ok && d.found) return { completedAt: d.completedAt ?? null, attempts: d.attempts ?? 1, canView: Boolean(d.canView) };
+    if (!res.ok && d.error) throw new Error(d.error);
+    return null;
+  }
+
   async function start(e: React.FormEvent) {
     e.preventDefault();
     setNotice(null); setBusy(true);
     try {
-      // Has this name completed the assessment before?
-      const res = await fetch('/api/lookup', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first: first.trim(), last: last.trim() }),
-        signal: AbortSignal.timeout(6000),
-      });
-      const d = await res.json().catch(() => ({}));
-      if (res.ok && d.found) {
-        setReturning({ completedAt: d.completedAt ?? null, attempts: d.attempts ?? 1, canView: Boolean(d.canView) });
-        setStage('returning');
-        return;
-      }
+      const found = await lookup();
+      if (found) { setReturning(found); setStage('returning'); return; }
     } catch {
-      // If the check fails, never block someone from taking the assessment.
+      // If the check fails, never block someone from taking a fresh assessment.
     } finally { setBusy(false); }
     beginQuiz();
+  }
+
+  async function lookupOnly() {
+    setNotice(null); setBusy(true);
+    try {
+      const found = await lookup();
+      if (found) { setReturning(found); setStage('returning'); return; }
+      setNotice('We could not find results for that exact name. Check the spelling, or start the assessment below.');
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'We could not reach the server. Check your connection and try again.');
+    } finally { setBusy(false); }
   }
 
   async function viewEarlier() {
@@ -186,32 +202,35 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
             start of a conversation with your pastor.
           </p>
 
-          <div className="faq" aria-label="About spiritual gifts">
-            <details>
-              <summary>What are spiritual gifts?</summary>
+          <Faq>
+            <FaqItem question="What are spiritual gifts?">
               <p>
                 Spiritual gifts are abilities and graces the Holy Spirit gives to believers so the whole Body is built up. Scripture
                 teaches that a manifestation of the Spirit is given to each person for the common good (1 Corinthians 12:7). A gift is
                 never about status. It is God&rsquo;s provision for the people around you.
               </p>
-            </details>
-            <details>
-              <summary>How are the gifts grouped here?</summary>
+            </FaqItem>
+            <FaqItem question="How are the gifts grouped here?">
               <ul>
                 {CATEGORIES.map((c) => (
                   <li key={c.id}><b>{c.title}</b>{c.scripture ? ` (${c.scripture})` : ''}. {c.blurb}</li>
                 ))}
               </ul>
-            </details>
-            <details>
-              <summary>How do I get the most from my results?</summary>
+            </FaqItem>
+            <FaqItem question="How do I get the most from my results?">
               <p>
                 Answer by how you naturally show up, not how you wish you did. There are no right answers. Your results rank every gift,
-                so look at your top few and the group they fall in. The ministry offices (Apostle, Prophet, Evangelist, Pastor) are recognized by
+                so look at your top few and the group they fall in. The ministry offices (Apostle, Prophet, Evangelist, Pastor, Teacher) are recognized by
                 church leadership, so take those to your pastor. Then try serving where your gifts point, and watch for fruit.
               </p>
-            </details>
-          </div>
+            </FaqItem>
+            <FaqItem question="How do I see my results again?">
+              <p>
+                Enter the same first and last name you used before and select &ldquo;Look up my results.&rdquo; You do not need an email
+                address for this. If that name has completed the assessment, you will see the option to view your earlier results or retake it.
+              </p>
+            </FaqItem>
+          </Faq>
 
           <div className="stats">
             <div className="stat"><b>{TOTAL}</b><span>statements</span></div>
@@ -231,9 +250,15 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
                   onChange={(e) => setLast(e.target.value)} />
               </div>
             </div>
-            <button className="btn" type="submit" disabled={busy || !first.trim() || !last.trim()}>
-              {busy ? 'One moment' : 'Start the assessment'}
-            </button>
+            <div className="start-actions">
+              <button className="btn" type="submit" disabled={busy || !first.trim() || !last.trim()}>
+                {busy ? 'One moment' : 'Start the assessment'}
+              </button>
+              <button type="button" className="btn ghost" disabled={busy || !first.trim() || !last.trim()} onClick={lookupOnly}>
+                Look up my results
+              </button>
+            </div>
+            {notice ? <p className="status err" role="status">{notice}</p> : null}
             <p className="fine">Your name and results are shared with the Verity ministry team.</p>
           </form>
         </section>

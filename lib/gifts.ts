@@ -131,7 +131,7 @@ export const GIFTS: Gift[] = [
     does: 'shepherd and protect people',
     whereItShows: 'Care, counseling, protection, nurturing, spiritual covering.',
     stakes: 'Sheep scatter and wounds go unhealed without care and protection.' },
-  { id: 'teaching', name: 'Teaching', categories: ['office', 'motivational'],
+  { id: 'teaching', name: 'Teaching', categories: ['office', 'motivational'], office: true,
     tagline: 'Grounds believers in doctrine, truth, and understanding, and makes complex things simple.',
     does: 'ground people in truth and doctrine',
     whereItShows: 'Classes, small groups, discipleship, youth ministry.',

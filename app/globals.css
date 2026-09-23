@@ -68,18 +68,24 @@ button { cursor: pointer; }
   display: inline-flex; align-items: center; gap: 0.55rem; flex: none;
   height: 40px; padding: 0 0.4rem 0 0.85rem; border-radius: var(--r-pill);
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
+/* On the hero banner the toggle sits on an arbitrary photo/color, so it always keeps its own
+   light-surface/dark-surface contrast (never the hero's white text) plus a shadow to stay legible. */
+.hero .theme-toggle { box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25); }
 .theme-toggle-label {
   font-family: var(--font-head); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  transition: color 0.2s ease;
 }
 .theme-toggle-icon {
-  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--accent-soft); color: var(--accent); flex: none;
+  position: relative; width: 30px; height: 30px; border-radius: 50%; flex: none;
+  background: var(--accent-soft); color: var(--accent);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-.hero .theme-toggle { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
-.hero .theme-toggle-label { color: rgba(255, 255, 255, 0.85); }
-.hero .theme-toggle-icon { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.theme-toggle-icon svg {
+  position: absolute; inset: 0; margin: auto; transition: opacity 0.2s ease;
+}
 
 
 /* ---------- intro ---------- */
@@ -199,32 +205,38 @@ button { cursor: pointer; }
 .bar-row.wide { grid-template-columns: 13rem 1fr 2.6rem; }
 .top-item .cats { color: var(--muted); font-size: 0.88rem; margin-top: 0.3rem; }
 
-/* ---------- intro FAQ ---------- */
+/* ---------- intro FAQ (sliding accordion) ---------- */
 .faq { margin: 2rem 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 0.5rem clamp(1rem, 4vw, 2rem); width: 100%; }
-.faq details { border-top: 1px solid var(--line); }
-.faq details:first-child { border-top: 0; }
-.faq summary {
-  list-style: none; cursor: pointer; display: flex; gap: 0.85rem; align-items: center; min-height: 56px;
-  font-family: var(--font-head); font-weight: 600; font-size: 1.02rem;
+.faq-item { border-top: 1px solid var(--line); }
+.faq-item:first-child { border-top: 0; }
+.faq-summary {
+  width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  display: flex; gap: 0.85rem; align-items: center; min-height: 56px;
+  font-family: var(--font-head); font-weight: 600; font-size: 1.02rem; color: var(--ink);
 }
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::before {
-  content: '+'; flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+.faq-plus {
+  flex: none; width: 26px; height: 26px; display: grid; place-items: center;
   border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 700; line-height: 1;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
-.faq details[open] summary::before { content: '\2212'; background: var(--accent); color: var(--accent-ink); }
-.faq details > p, .faq details > ul { margin: 0 0 1.1rem 2.6rem; color: var(--muted); font-size: 0.98rem; }
-.faq ul { padding-left: 1.1rem; display: grid; gap: 0.5rem; }
-.faq li b { color: var(--ink); font-weight: 600; }
+.faq-summary[aria-expanded='true'] .faq-plus { background: var(--accent); color: var(--accent-ink); transform: rotate(180deg); }
+/* The 0fr/1fr grid-row trick animates open/closed height without measuring the content. */
+.faq-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
+.faq-panel-inner { overflow: hidden; min-height: 0; }
+.faq-panel > .faq-panel-inner > p, .faq-panel > .faq-panel-inner > ul { margin: 0 0 1.1rem 2.6rem; color: var(--muted); font-size: 0.98rem; }
+.faq-panel ul { padding-left: 1.1rem; display: grid; gap: 0.5rem; }
+.faq-panel li b { color: var(--ink); font-weight: 600; }
 
 /* ---------- start form ---------- */
 .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 34rem; }
 .name-row .field { max-width: none; }
-.start-form .btn { margin-top: 1.5rem; }
+.start-actions { display: flex; gap: 0.85rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.start-form .status { margin-top: 1rem; max-width: 34rem; }
 .intro .actions { margin-top: 1.75rem; }
 @media (max-width: 34rem) {
   .name-row { grid-template-columns: 1fr; }
-  .start-form .btn { width: 100%; }
+  .start-actions { flex-direction: column; }
+  .start-actions .btn { width: 100%; }
   .intro .actions .btn { width: 100%; }
   .keyhint { display: none; }
 }

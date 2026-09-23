@@ -127,7 +127,7 @@ export function buildResults(answers: Answers, ministries: Ministry[] = []): Res
   }
 
   if (top.some((g) => GIFT_MAP[g.id].office)) {
-    notes.push('Apostle, Prophet, Evangelist, and Pastor are ministry offices that church leadership recognizes and affirms. Treat this as a starting point for a conversation with your pastor.');
+    notes.push('Apostle, Prophet, Evangelist, Pastor, and Teacher are the five ministry offices that church leadership recognizes and affirms. Treat this as a starting point for a conversation with your pastor.');
   }
 
   const categories: CategoryScore[] = CATEGORIES.map((c) => {
