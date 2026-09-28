@@ -27,6 +27,7 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
   const [stage, setStage] = useState<Stage>('intro');
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [returning, setReturning] = useState<Returning | null>(null);
@@ -238,6 +239,14 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
           </div>
 
           <form onSubmit={start} className="start-form">
+            <p className="fine age-notice">
+              This assessment is for ages 13 and up. If you&rsquo;re under 13, please have a parent complete it with you. If
+              you&rsquo;re 13&ndash;17, get a parent or guardian&rsquo;s okay before entering your name and email.
+            </p>
+            <label className="check">
+              <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} required />
+              <span>I confirm I&rsquo;m 13 or older, or a parent/guardian is completing this with me.</span>
+            </label>
             <div className="name-row">
               <div className="field">
                 <label htmlFor="first-name">First name</label>
@@ -251,10 +260,10 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
               </div>
             </div>
             <div className="start-actions">
-              <button className="btn" type="submit" disabled={busy || !first.trim() || !last.trim()}>
+              <button className="btn" type="submit" disabled={busy || !first.trim() || !last.trim() || !ageConfirmed}>
                 {busy ? 'One moment' : 'Start the assessment'}
               </button>
-              <button type="button" className="btn ghost" disabled={busy || !first.trim() || !last.trim()} onClick={lookupOnly}>
+              <button type="button" className="btn ghost" disabled={busy || !first.trim() || !last.trim() || !ageConfirmed} onClick={lookupOnly}>
                 Look up my results
               </button>
             </div>
