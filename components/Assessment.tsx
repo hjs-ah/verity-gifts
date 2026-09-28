@@ -9,6 +9,7 @@ import type { Ministry } from '@/lib/ministries';
 import { QUESTIONS, SCALE } from '@/lib/questions';
 import type { Answers } from '@/lib/scoring';
 import Results from './Results';
+import SiteFooter from './SiteFooter';
 import ThemeToggle from './ThemeToggle';
 
 type Stage = 'intro' | 'returning' | 'quiz' | 'results';
@@ -315,6 +316,7 @@ export default function Assessment({ ministries, hero }: { ministries: Ministry[
       ) : (
         <Results first={first.trim()} last={last.trim()} answers={answers} ministries={ministries} onRetake={startOver} />
       )}
+      <SiteFooter />
       </div>
     </main>
   );
